@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - node
+    networks:
+      - fullcycle
+
+  node:
+    build:
+      context: ./node
+    container_name: node
+    volumes:
+      - ./node:/usr/src/app
+    working_dir: /usr/src/app
+    command: node index.js
+    depends_on:
+      - db
+    networks:
+      - fullcycle
+
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nodedb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - fullcycle
+
+volumes:
+  mysql_data:
+
+networks:
+  fullcycle:
+    driver: bridge
